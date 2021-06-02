@@ -55,12 +55,19 @@ class Balls:
         '''
         if c != -1 and r != -1:
             self.__search_same_nearby(c, r)
-            self.group_balls.sort()
             print(self.group_balls)
+            if len(self.group_balls) >= 3:
+                return True
             self.group_balls.clear()
-
-            # if len(self.group_balls) >= 3:
-            #     self.__del_group_balls()
+            return False
+        else:
+            for i in range(1, Balls.col + 1):  # колонки
+                for j in range(1, Balls.row + 1):  # строки
+                    if len(self.__check_mas(i, j)) >= 3:
+                        self.group_balls.clear()
+                        return True
+            self.group_balls.clear()
+            return False
 
     @staticmethod
     def __get_number_from_index(c, r):
@@ -69,12 +76,25 @@ class Balls:
     @staticmethod
     def __get_index_from_number(num):
         num -= 1
-        c, r = num // Balls.row, num % Balls.col
+        r = num // Balls.row + 1
+        c = num - (r - 1) * Balls.row + 1
+        print("index ", c, r)
         return c, r
 
-    # def __del_group_balls(self):
-    #     balls = sorted(self.group_balls)
-    #     for ball in balls
+    def __del_group_balls(self):
+        self.group_balls.sort()
+        print(self.group_balls)
+        while self.group_balls:
+            print(self.group_balls)
+            cd, rd = self.__get_index_from_number(self.group_balls.pop())
+            print(cd, rd, self.__get_number_from_index(cd, rd))
+            del self.mas[rd][cd]
+
+    def __filling_mas(self):
+        for i in range(Balls.col + 2):
+            len_line = len(self.mas[i])
+            if len_line < Balls.row + 2:
+                self.mas[i] = ([0] * (Balls.row + 2 - len_line)) + self.mas[i]
 
     def __search_same_nearby(self, c, r):
         """Поиск одинаоквых шаров рядом по вертикали и горизонтали"""
@@ -134,7 +154,10 @@ class Balls:
                     col_mouse = x_mouse // (2 * Balls.RADIUS_BALL)
                     row_mouse = y_mouse // (2 * Balls.RADIUS_BALL)
                     print(f"x = {col_mouse} y = {row_mouse} - {col_mouse * Balls.row + row_mouse + 1}")
-                    self.__check_mas(row_mouse + 1, col_mouse + 1)
+                    if self.__check_mas(row_mouse + 1, col_mouse + 1):
+                        self.__del_group_balls()
+                        self.__filling_mas()
+                        self.__created_random_balls()
                 self.__draw_balls()
                 self.__draw_numbers()
             pygame.display.update()
